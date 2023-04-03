@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search> 
+  
+  
+    
+    <entry>
+      <title>Probabilistic Graphical Models</title>
+      <link href="/blog/2023/04/03/Probabilistic-Graphical-Models/"/>
+      <url>/blog/2023/04/03/Probabilistic-Graphical-Models/</url>
+      
+        <content type="html"><![CDATA[<h2 id="简介">简介</h2><p>（施工中…）</p><h2 id="Bayesian-networks">Bayesian networks</h2><p>$$<br>p(x_1,x_2,\dots, x_n)=\prod_{i\in V}p(x_i\mid \boldsymbol{x}_{Pa(i)})<br>$$<br>（施工中…）</p>]]></content>
+      
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>GMM</title>
+      <link href="/blog/2023/04/02/GMM/"/>
+      <url>/blog/2023/04/02/GMM/</url>
+      
+        <content type="html"><![CDATA[<h2 id="简介">简介</h2><p>（施工中…）</p>]]></content>
+      
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>PLSA</title>
+      <link href="/blog/2023/04/02/PLSA/"/>
+      <url>/blog/2023/04/02/PLSA/</url>
+      
+        <content type="html"><![CDATA[<p>前置知识：<a href="/blog/2023/04/02/EM-algorithm/">EM算法</a>，<a href="">概率图模型</a></p><h2 id="简介">简介</h2><p>概率潜在语义分析（Probabilistic Latent Semantic Analysis, PLSA）是一种用于文本处理、信息检索和主题分析的概率模型。其在潜在语义分析LSA的基础上，通过引入概率图模型为基础，对文档和主题进行建模。</p><p>它假设一篇文档中的每个词都是从一组概率分布中随机生成的，这组分布被称为“主题”。在PLSA模型中，每个文档都被表示为一组主题的概率分布，而每个主题也被表示为一组单词的概率分布。因此，PLSA模型可以将文档和单词映射到低维主题空间中，这有助于提取文本的隐藏语义信息。</p><p>PLSA模型的训练过程涉及到最大化似然函数，通常使用EM算法来实现。在使用PLSA进行文本分类、信息检索、主题建模等任务时，可以将文档表示为主题的概率分布，从而对文本进行分类、匹配等操作。</p><h2 id="LSA（潜在语义分析）">LSA（潜在语义分析）</h2><p>潜在语义分析（Latent Semantic Analysis, LSA）基于词项在文档集合中的共现特性，表达词项的潜在意义。它通过“降维”的方式获得主题。</p><p>假设我们已经给出了一个文本文档集合$D = {d_1,\dots, d_M}$与词汇表$W = {w_1，\dots, w_N}$，其中$M$表示文档数，$N$表示词项数，对每篇文档的单词词频进行统计并建立词项文档矩阵（term-document matrix）$C\in \mathbb{R}^{M\times N}$。由于文档分布在稀疏词汇空间上，这种文档表示难以分析利用（即$C$往往是稀疏矩阵），因此通过降维让文档分布在一个维度有限的潜在语义空间上。LSA利用矩阵低秩近似方式将词项信息映射到潜在语义空间 (主题空间)。对$C$进行截断的奇异值分解（truncated SVD），截断所用的$K$则为主题数量。</p><p>$$<br>C=U\Sigma V^T,\quad C\approx \hat{U}\hat{\Sigma} \hat{V}^T (\text{truncated})<br>$$</p><p>其中$\hat{U}\in \mathbb{R}^{M \times K}$是词项特征向量组成的矩阵，表示词项在隐含语义空间（主题空间）中的变换，$CC^T$表示词项相似度，值为两个词项在文档中共现次数；$\hat{V}\in \mathbb{R}^{N \times K}$是文档特征向量组成的矩阵，表示文档在隐含语义空间（主题空间）中的变换，$C^TC$表示文档相似度，值为两个文档中共同词项的数量。通过奇异值分解我们即完成了对词和文档的分类，同时得到了不同主题的文章其相关的高频词。</p><p>LSA的优势是可以一定程度建模一义多词现象，同时可以得到词项相似度、文档相似度、词项与文档的相似度，可用于信息检索。但其仍有缺陷，潜在语义空间中的元素缺少解释；$K$是经验性的设定；SVD求解复杂度较高，存在数值不稳定问题，当有新的文档来到时，若要更新模型需重新训练。</p><h2 id="PLSA（概率潜在语义分析）">PLSA（概率潜在语义分析）</h2><p>PLSA加入了主题这一隐变量，记主题集合为$Z = {z_1,\dots, z_K}$。主题模型主要关心文档生成主题，主题生成词汇。PLSA利用概率方法学习隐含的主题分布，是一种基于有向图的生成模型：<br><img src="/blog/2023/04/02/PLSA/1.png" alt="PLSA概率图模型" title="PLSA概率图模型"></p><p>上述变量有两个状态：observed ($d,w$), latent ($z$)。由概率图的定义，联合概率$p(d_i,w_j,z_k)=p(d_i)p(z_k\mid d_i)p(w_j\mid z_k)$。其中$p(d_i)$表示生成文档$d_i$的概率；$p(z_k\mid d_i)$表示文档$d_i$生成主题$z_k$的概率（每个文档$d_i$的主题概率分布）；$p(w_j\mid z_k)$表示主题$z_k$生成词项$w_j$的概率（每个主题$z_k$的词项概率分布）。</p><p>我们需要对观测到的变量$d, w$做最大似然估计，得到对数似然函数：<br>$$<br>\begin{align*}<br>L &amp;=\log \left(\prod_{i=1}^M\prod_{j=1}^Np(d_i,w_j)^{n(d_i,w_j)}\right)\\<br>&amp;=\sum_{i=1}^M\sum_{j=1}^Nn(d_i,w_j)\log p(d_i,w_j)\\<br>&amp;=\sum_{i=1}^M\sum_{j=1}^Nn(d_i,w_j)\log \left(\sum_{k=1}^Kp(d_i,w_j,z_k)\right)\\<br>&amp;=\sum_{i=1}^M\sum_{j=1}^Nn(d_i,w_j)\log \left(\sum_{k=1}^Kp(d_i)p(z_k\mid d_i)p(w_j\mid z_k)\right)\\<br>&amp;\propto \sum_{i=1}^M\sum_{j=1}^Nn(d_i,w_j)\log \left(\sum_{k=1}^Kp(z_k\mid d_i)p(w_j\mid z_k)\right)<br>\end{align*}<br>$$<br>其中$n(d_i,w_j)$表示文档$d_i$中词项$w_j$出现的次数。</p><p>在已知数据的情况下，$p(d_i)=\frac{1}{M}$为一常数，因此我们要优化的参数即为$p(z_k\mid d_i), p(w_j\mid z_k)$，约有$(M+N)K$个。由于对数里求和的形式不容易直接优化，且含有隐变量，因此考虑使用EM算法求解。</p><p>在E-step中，我们假设模型参数给定，即$\hat{p}(z_k\mid d_i), \hat{p}(w_j\mid z_k)$已知，可求解后验概率$\hat{p}(z_k\mid d_i,w_j)$：<br>$$<br>\begin{align*}<br>\hat{p}(z_k\mid d_i,w_j)&amp;=\frac{\hat{p}(d_i,w_j,z_k)}{\hat{p}(d_i,w_j)}\\<br>&amp;=\frac{\hat{p}(z_k\mid d_i)\hat{p}(w_j\mid z_k)}{\sum_{k^{\prime}}^K \hat{p}(z_{k^{\prime}}\mid d_i)\hat{p}(w_j\mid z_{k^{\prime}})}<br>\end{align*}<br>$$</p><p>得到当前需优化的Q函数：<br>$$<br>Q=\sum_{i=1}^M\sum_{j=1}^Nn(d_i,w_j)\sum_{k=1}^K \hat{p}(z_k\mid d_i,w_j)\log \left(p(z_k\mid d_i)p(w_j\mid z_k)\right)<br>$$</p><p>在M-step中，我们则需优化参数$p(z_k\mid d_i), p(w_j\mid z_k)$来最大化Q函数。这是个受限制的优化，需要各参数满足：<br>$$<br>\begin{gather*}<br>\sum_{k=1}^Kp(z_k\mid d_i)=1,\quad i=1,2,\dots,M\<br>\sum_{j=1}^Np(w_j\mid z_k)=1,\quad k=1,2,\dots,K<br>\end{gather*}<br>$$</p><p>因此引入拉格朗日乘子$\boldsymbol{\lambda}={\lambda_1,\dots,\lambda_M}, \boldsymbol{\mu}={\mu_1,\dots,\mu_K}$，将优化目标修改为:<br>$$<br>\mathcal{H}=Q+\sum_{i=1}^M\lambda_i\left(1-\sum_{k=1}^Kp(z_k\mid d_i)\right)+\sum_{k=1}^K\mu_k\left(1-\sum_{j=1}^Np(w_j\mid z_k)\right)<br>$$</p><p>对各参数求导并令导数为0，得到:<br>$$<br>\begin{gather*}<br>\sum_{j=1}^{N}n(d_i,w_j)\hat{p}(z_k\mid d_i,w_j)-\lambda_i p(z_k\mid d_i)=0, \quad \forall, k,i\\<br>\sum_{i=1}^Mn(d_i,w_j)\hat{p}(z_k\mid d_i,w_j)-\mu_k p(w_j\mid z_k)=0,\quad \forall, j,k<br>\end{gather*}<br>$$</p><p>利用概率归一化条件，上述两个式子分别对$k,j$求和，得到：<br>$$<br>\begin{gather*}<br>\lambda_i=\sum_{k=1}^K\sum_{j=1}^{N}n(d_i,w_j)\hat{p}(z_k\mid d_i,w_j),\quad \forall ,i\\<br>\mu_k=\sum_{j=1}^N\sum_{i=1}^Mn(d_i,w_j)\hat{p}(z_k\mid d_i,w_j),\quad \forall , k<br>\end{gather*}<br>$$</p><p>整理可得极大化Q函数时各个模型参数的值：<br>$$<br>\begin{align*}<br>p(z_k\mid d_i)&amp;=\frac{\sum_{j=1}^{N}n(d_i,w_j)\hat{p}(z_k\mid d_i,w_j)}{\sum_{k^{\prime}=1}^K\sum_{j=1}^{N}n(d_i,w_j)\hat{p}(z_{k^{\prime}}\mid d_i,w_j)}\\<br>&amp;=\frac{\sum_{j=1}^{N}n(d_i,w_j)\hat{p}(z_k\mid d_i,w_j)}{n(d_i)}\\<br>p(w_j\mid z_k)&amp;=\frac{\sum_{i=1}^Mn(d_i,w_j)\hat{p}(z_k\mid d_i,w_j)}{\sum_{j^{\prime}=1}^N\sum_{i=1}^Mn(d_i,w_{j^{\prime}})\hat{p}(z_k\mid d_i,w_{j^{\prime}})}<br>\end{align*}<br>$$<br>其中$n(d_i)=\sum_{j=1}^Nn(d_i,w_j)$，表示文档$d_i$中的词项总数。</p><p>总结PLSA的流程：</p><ul><li>设置参数$p(z_k\mid d_i), p(w_j\mid z_k)$的初始值；</li><li>迭代执行E-step, M-step直至收敛或达到最大迭代轮次，得到参数$p(z_k\mid d_i), p(w_j\mid z_k)$的终值。</li></ul><p>PLSA是LSA的概率化版本，主题以词的概率分布表示，文档则以主题的概率分布表示，相比LSA，概率化的理论解释性更好。但主题数量仍然需要经验性确定；需要学习的参数量多，有过拟合的可能性，需要大量的样本才能得到较好的模型；没有解决为未知文档分配主题概率的问题。</p><p><strong>Reference</strong></p><p>上课的PPT</p><p><a href="https://link.springer.com/article/10.1023/A:1007617005950">Unsupervised Learning by Probabilistic Latent Semantic Analysis | SpringerLink</a></p><p><a href="https://zhuanlan.zhihu.com/p/401513907">【学习笔记】pLSA算法原理手写推导 - 知乎 (zhihu.com)</a></p><p><a href="https://zhuanlan.zhihu.com/p/31235789">pLSA原理及其代码实现 - 知乎 (zhihu.com)</a></p><p><a href="https://zhuanlan.zhihu.com/p/54168587">情感分析中的PLSA、LDA模型 - 知乎 (zhihu.com)</a></p>]]></content>
+      
+      
+      
+        <tags>
+            
+            <tag> EM algorithm </tag>
+            
+            <tag> Topic Modeling </tag>
+            
+            <tag> NLP </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>EM algorithm</title>
+      <link href="/blog/2023/04/02/EM-algorithm/"/>
+      <url>/blog/2023/04/02/EM-algorithm/</url>
+      
+        <content type="html"><![CDATA[<h2 id="简介">简介</h2><p>期望最大化算法（expectation-maximization algorithm, EM algorithm）是最常见的隐变量估计方法，目的是求解带有隐变量的最大似然问题。EM算法是一种迭代优化策略，它的计算方法中每一次迭代都分两步，其中一个为期望步（E步），另一个为极大步（M步）。在E步中，算法假设已经有了一组参数估计，然后根据这组参数估计，计算出隐含变量的期望值。在M步中，算法根据E步计算出的隐含变量的期望值，通过最大化对数似然函数的方式来更新参数估计。通过交替执行E步和M步，EM算法可以逐步优化模型参数，直到达到收敛条件为止。虽然EM算法不一定能够得到全局最优解，但是在许多实际问题中，它通常能够得到较好的局部最优解。</p><h2 id="EM算法推导">EM算法推导</h2><p>我们记$\boldsymbol{X}$为所有观测到的数据，$\boldsymbol{Z}$为所有的隐变量，其对数似然函数为：<br>$$<br>% \begin{equation}<br>L(\theta)=\log p(\boldsymbol{X};\theta) =\log \sum_{z \in \boldsymbol{Z}} p(\boldsymbol{X}, z;\theta)<br>% \end{equation}<br>$$<br>我们的目的是求出各参数让似然函数值达到最大，但上式中存在对数里求和的形式不方便求解，我们引入一个新的与隐变量有关的分布$q(z)$， $\sum_{z\in \boldsymbol{Z} }q(z)=1$：<br>$$<br>% \begin{equation}<br>L(\theta)=\log \sum_{z \in \boldsymbol{Z}} q(z)\frac{p(\boldsymbol{X}, z;\theta)}{q(z)}\geq \sum_{z \in \boldsymbol{Z}} q(z) \log \frac{p(\boldsymbol{X}, z;\theta)}{q(z)}<br>% \end{equation}<br>$$<br>上述不等式可由Jensen不等式导出，当且仅当存在一个常数$c$，使得对$\forall z \in Z$，有：<br>$$<br>\frac{p(X,z;\theta)}{q(z)}=c<br>$$<br>由<br>$$<br>\sum_{z\in \boldsymbol{Z}} q(z)=\frac{1}{c}\sum_{z\in \boldsymbol{Z}}p(\boldsymbol{X},z;\theta)=\frac{1}{c}p(\boldsymbol{X};\theta)=1<br>$$<br>得$\forall z \in Z$:<br>$$<br>q(z)=\frac{p(X,z;\theta)}{c}=\frac{p(X,z;\theta)}{p(\boldsymbol{X};\theta)}=p(z\mid \boldsymbol{X};\theta)<br>$$<br>由此我们可以得到$L(\theta)$的一个下界：<br>$$<br>\sum_{z \in \boldsymbol{Z}} p(z\mid \boldsymbol{X};\theta) \log \frac{p(\boldsymbol{X}, z;\theta)}{p(z\mid \boldsymbol{X};\theta)}<br>=E_{\boldsymbol{Z}|\boldsymbol{X};\theta}[\log p(\boldsymbol{X}, z;\theta)]+H(p(\boldsymbol{Z}|\boldsymbol{X};\theta))<br>$$<br>如果我们能极大化这个下界，则也在尝试极大化我们的对数似然。若给定模型参数$\theta=\hat{\theta}$，则后验概率$p(z|\boldsymbol{X};\hat{\theta})$可求，$H(p(\boldsymbol{Z}|\boldsymbol{X};\hat{\theta}))$为一常数，此时我们只需要极大化条件期望$E_{\boldsymbol{Z}|\boldsymbol{X};\hat{\theta}}[\log p(\boldsymbol{X}, z;\theta)]$，更新$\theta$。通过交替更新的思路，不断迭代重复上述过程，以此来优化这个问题。</p><h2 id="EM算法流程">EM算法流程</h2><ul><li>随机初始化模型参数$\theta$的初值$\theta^{(0)}$</li><li>迭代轮数$t$小于等于最大迭代轮数$T$时：<ul><li>E-step: 求解后验概率$p(z|\boldsymbol{X};\theta^{t})$，并得到当前需优化期望表达式（Q函数）$$Q(\theta;\theta^{(t)})=E_{\boldsymbol{Z}|\boldsymbol{X};\theta^{t}}[\log p(\boldsymbol{X}, z;\theta)]$$</li><li>M-step: 极大化$Q(\theta;\theta^{(t)})$，得到$\theta^{t+1}$$$\theta^{t+1}=\mathop{\arg\max}\limits_{\theta}  Q(\theta;\theta^{(t)})$$</li><li>判断$\theta^{t+1}$是否收敛，若收敛则终止算法，否则继续交替地进行两个步骤。</li></ul></li></ul><h2 id="EM算法收敛性证明">EM算法收敛性证明</h2><p>（施工中…）</p><h2 id="从另一视角看EM算法">从另一视角看EM算法</h2><p>（施工中…）</p><p><strong>Reference</strong></p><p><a href="https://www.cnblogs.com/pinard/p/6912636.html">EM算法原理总结 - 刘建平Pinard - 博客园 (cnblogs.com)</a></p>]]></content>
+      
+      
+      
+        <tags>
+            
+            <tag> EM algorithm </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+  
+  
+</search>
