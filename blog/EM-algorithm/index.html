@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-fire.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-fire.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-fire.jpg">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"trl-0.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"flat"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="简介期望最大化算法（expectation-maximization algorithm, EM algorithm）是最常见的隐变量估计方法，目的是求解带有隐变量的最大似然问题。EM算法是一种迭代优化策略，它的计算方法中每一次迭代都分两步，其中一个为期望步（E步），另一个为极大步（M步）。在E步中，算法假设已经有了一组参数估计，然后根据这组参数估计，计算出隐含变量的期望值。在M步中，算法根据E步">
+<meta property="og:type" content="article">
+<meta property="og:title" content="EM algorithm">
+<meta property="og:url" content="https://trl-0.github.io/blog/EM-algorithm/index.html">
+<meta property="og:site_name" content="一个正在建设中的网页">
+<meta property="og:description" content="简介期望最大化算法（expectation-maximization algorithm, EM algorithm）是最常见的隐变量估计方法，目的是求解带有隐变量的最大似然问题。EM算法是一种迭代优化策略，它的计算方法中每一次迭代都分两步，其中一个为期望步（E步），另一个为极大步（M步）。在E步中，算法假设已经有了一组参数估计，然后根据这组参数估计，计算出隐含变量的期望值。在M步中，算法根据E步">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-04-02T08:39:45.000Z">
+<meta property="article:modified_time" content="2023-04-03T15:23:31.242Z">
+<meta property="article:author" content="TRL-0">
+<meta property="article:tag" content="EM algorithm">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://trl-0.github.io/blog/EM-algorithm/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>EM algorithm | 一个正在建设中的网页</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一个正在建设中的网页</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>博客</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://trl-0.github.io/blog/EM-algorithm/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="TRL-0">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一个正在建设中的网页">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          EM algorithm
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-04-02 16:39:45" itemprop="dateCreated datePublished" datetime="2023-04-02T16:39:45+08:00">2023-04-02</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-04-03 23:23:31" itemprop="dateModified" datetime="2023-04-03T23:23:31+08:00">2023-04-03</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>期望最大化算法（expectation-maximization algorithm, EM algorithm）是最常见的隐变量估计方法，目的是求解带有隐变量的最大似然问题。EM算法是一种迭代优化策略，它的计算方法中每一次迭代都分两步，其中一个为期望步（E步），另一个为极大步（M步）。在E步中，算法假设已经有了一组参数估计，然后根据这组参数估计，计算出隐含变量的期望值。在M步中，算法根据E步计算出的隐含变量的期望值，通过最大化对数似然函数的方式来更新参数估计。通过交替执行E步和M步，EM算法可以逐步优化模型参数，直到达到收敛条件为止。虽然EM算法不一定能够得到全局最优解，但是在许多实际问题中，它通常能够得到较好的局部最优解。</p>
+<h2 id="EM算法推导"><a href="#EM算法推导" class="headerlink" title="EM算法推导"></a>EM算法推导</h2><p>我们记$\boldsymbol{X}$为所有观测到的数据，$\boldsymbol{Z}$为所有的隐变量，其对数似然函数为：</p>
+<script type="math/tex; mode=display">
+% \begin{equation}
+    L(\theta)=\log p(\boldsymbol{X};\theta) =\log \sum_{z \in \boldsymbol{Z}} p(\boldsymbol{X}, z;\theta)
+% \end{equation}</script><p>我们的目的是求出各参数让似然函数值达到最大，但上式中存在对数里求和的形式不方便求解，我们引入一个新的与隐变量有关的分布$q(z)$， $\sum_{z\in \boldsymbol{Z} }q(z)=1$：</p>
+<script type="math/tex; mode=display">
+% \begin{equation}
+    L(\theta)=\log \sum_{z \in \boldsymbol{Z}} q(z)\frac{p(\boldsymbol{X}, z;\theta)}{q(z)}\geq \sum_{z \in \boldsymbol{Z}} q(z) \log \frac{p(\boldsymbol{X}, z;\theta)}{q(z)}
+% \end{equation}</script><p>上述不等式可由Jensen不等式导出，当且仅当存在一个常数$c$，使得对$\forall z \in Z$，有：</p>
+<script type="math/tex; mode=display">
+\frac{p(X,z;\theta)}{q(z)}=c</script><p>由</p>
+<script type="math/tex; mode=display">
+\sum_{z\in \boldsymbol{Z}} q(z)=\frac{1}{c}\sum_{z\in \boldsymbol{Z}}p(\boldsymbol{X},z;\theta)=\frac{1}{c}p(\boldsymbol{X};\theta)=1</script><p>得$\forall z \in Z$:</p>
+<script type="math/tex; mode=display">
+q(z)=\frac{p(X,z;\theta)}{c}=\frac{p(X,z;\theta)}{p(\boldsymbol{X};\theta)}=p(z\mid \boldsymbol{X};\theta)</script><p>由此我们可以得到$L(\theta)$的一个下界：</p>
+<script type="math/tex; mode=display">
+\sum_{z \in \boldsymbol{Z}} p(z\mid \boldsymbol{X};\theta) \log \frac{p(\boldsymbol{X}, z;\theta)}{p(z\mid \boldsymbol{X};\theta)}
+=E_{\boldsymbol{Z}|\boldsymbol{X};\theta}[\log p(\boldsymbol{X}, z;\theta)]+H(p(\boldsymbol{Z}|\boldsymbol{X};\theta))</script><p>如果我们能极大化这个下界，则也在尝试极大化我们的对数似然。若给定模型参数$\theta=\hat{\theta}$，则后验概率$p(z|\boldsymbol{X};\hat{\theta})$可求，$H(p(\boldsymbol{Z}|\boldsymbol{X};\hat{\theta}))$为一常数，此时我们只需要极大化条件期望$E_{\boldsymbol{Z}|\boldsymbol{X};\hat{\theta}}[\log p(\boldsymbol{X}, z;\theta)]$，更新$\theta$。通过交替更新的思路，不断迭代重复上述过程，以此来优化这个问题。</p>
+<h2 id="EM算法流程"><a href="#EM算法流程" class="headerlink" title="EM算法流程"></a>EM算法流程</h2><ul>
+<li>随机初始化模型参数$\theta$的初值$\theta^{(0)}$</li>
+<li>迭代轮数$t$小于等于最大迭代轮数$T$时：<ul>
+<li>E-step: 求解后验概率$p(z|\boldsymbol{X};\theta^{t})$，并得到当前需优化期望表达式（Q函数）<script type="math/tex">Q(\theta;\theta^{(t)})=E_{\boldsymbol{Z}|\boldsymbol{X};\theta^{t}}[\log p(\boldsymbol{X}, z;\theta)]</script></li>
+<li>M-step: 极大化$Q(\theta;\theta^{(t)})$，得到$\theta^{t+1}<script type="math/tex">$\theta^{t+1}=\mathop{\arg\max}\limits_{\theta}  Q(\theta;\theta^{(t)})</script></li>
+<li>判断$\theta^{t+1}$是否收敛，若收敛则终止算法，否则继续交替地进行两个步骤。</li>
+</ul>
+</li>
+</ul>
+<h2 id="EM算法收敛性证明"><a href="#EM算法收敛性证明" class="headerlink" title="EM算法收敛性证明"></a>EM算法收敛性证明</h2><p>（施工中…）</p>
+<p><strong>Reference</strong></p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/pinard/p/6912636.html">EM算法原理总结 - 刘建平Pinard - 博客园 (cnblogs.com)</a></p>
+
+    </div>
+
+    
+    
+    
+
+    
+      <div>
+         <div>
+     
+         <div style="text-align:center;color: #ccc;font-size:14px;">---------- 本文完   感谢您的阅读 ----------</div>
+     
+ </div>
+      </div>
+    
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/EM-algorithm/" rel="tag"><i class="fa fa-tag"></i> EM algorithm</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item"></div>
+      <div class="post-nav-item">
+    <a href="/blog/Probabilistic-Latent-Semantic-Analysis/" rel="next" title="Probabilistic Latent Semantic Analysis">
+      Probabilistic Latent Semantic Analysis <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%80%E4%BB%8B"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#EM%E7%AE%97%E6%B3%95%E6%8E%A8%E5%AF%BC"><span class="nav-number">2.</span> <span class="nav-text">EM算法推导</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#EM%E7%AE%97%E6%B3%95%E6%B5%81%E7%A8%8B"><span class="nav-number">3.</span> <span class="nav-text">EM算法流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#EM%E7%AE%97%E6%B3%95%E6%94%B6%E6%95%9B%E6%80%A7%E8%AF%81%E6%98%8E"><span class="nav-number">4.</span> <span class="nav-text">EM算法收敛性证明</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">TRL-0</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">7</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TRL-0</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+          load: ['[tex]/mhchem'],
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+          packages: {'[+]': ['mhchem']},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>
