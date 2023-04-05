@@ -30,7 +30,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://trl-0.github.io/blog/Conjugate-distributions/1.svg">
 <meta property="article:published_time" content="2023-04-03T14:09:57.000Z">
-<meta property="article:modified_time" content="2023-04-03T16:06:25.799Z">
+<meta property="article:modified_time" content="2023-04-05T04:42:18.635Z">
 <meta property="article:author" content="TRL-0">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://trl-0.github.io/blog/Conjugate-distributions/1.svg">
@@ -222,7 +222,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-04-04 00:06:25" itemprop="dateModified" datetime="2023-04-04T00:06:25+08:00">2023-04-04</time>
+                <time title="修改时间：2023-04-05 12:42:18" itemprop="dateModified" datetime="2023-04-05T12:42:18+08:00">2023-04-05</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -253,10 +253,68 @@
 </ul>
 <p>在贝叶斯定理中，参数先有一个先验认知（先验分布），然后通过观察新数据，得到后验认知（后验分布）。在给定观测数据$x$后$p(x)$为常数，故$\text{Posterior}\propto\text{Likelihood}\cdot\text{Prior}$</p>
 <h2 id="Conjugate-distributions（共轭分布）"><a href="#Conjugate-distributions（共轭分布）" class="headerlink" title="Conjugate distributions（共轭分布）"></a>Conjugate distributions（共轭分布）</h2><p><b><span style="color:red;">前置知识：</span></b><a href="/blog/Gamma-function-and-Beta-function/">Gamma函数和Beta函数</a></p>
-<p>在贝叶斯统计中，如果后验分布与先验分布属于同一个概率分布族（probability distribution family），即分布形式相同，则先验分布与后验分布被称为共轭分布（conjugate distributions），而先验分布被称为似然函数的共轭先验（conjugate prior）。因为后验分布和先验分布形式相近，只是参数有所不同，这意味着当我们获得新的观察数据时，我们就能直接通过参数更新，获得新的后验分布，此后验分布将会在下次新数据到来的时候成为新的先验分布。如此一来，我们更新后验分布就不需要通过大量的计算，十分方便。</p>
-<p>（施工中…）</p>
-<p><strong>Reference</strong></p>
+<p>在贝叶斯统计中，如果后验分布与先验分布属于同一个概率分布族（probability distribution family），即分布形式相同，则先验分布与后验分布被称为共轭分布（conjugate distributions），而先验分布被称为该似然函数的共轭先验（conjugate prior）。因为后验分布和先验分布形式相近，只是参数有所不同，这意味着当我们获得新的观察数据时，我们就能直接通过参数更新，获得新的后验分布，此后验分布将会在下次新数据到来的时候成为新的先验分布。如此一来，我们更新后验分布就不需要通过大量的计算，十分方便。</p>
+<h3 id="Binomial-distribution-and-Beta-distribution（二项分布和贝塔分布）"><a href="#Binomial-distribution-and-Beta-distribution（二项分布和贝塔分布）" class="headerlink" title="Binomial distribution and Beta distribution（二项分布和贝塔分布）"></a>Binomial distribution and Beta distribution（二项分布和贝塔分布）</h3><p>伯努利分布（Bernoulli distribution）：对于参数$\mu\in [0,1]$，随机变量$x\in \{0,1\}$，其概率质量函数（PMF）为：</p>
+<script type="math/tex; mode=display">
+f(x;\mu)=\mu^x(1-\mu)^{n-x}</script><p>二项分布（Binomial distribution）：对于参数$n\in \mathbb{N},\mu\in[0,1]$，随机变量$x$的取值范围为$x\in \mathbb{N}, x\leq n$，其概率质量函数（PMF）为：</p>
+<script type="math/tex; mode=display">
+f(x;n,\mu)={\binom {n}{x}} \mu^x(1-\mu)^{n-x}</script><p>若$x\sim B(n,\mu)$，则随机变量$x$的期望为：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+    \mathrm E[x]&=\sum_{x=0}^{n}x\cdot {\binom {n}{x}}\mu^x(1-\mu)^{n-x}\\\\
+    &=\sum_{x=1}^{n}n\cdot {\binom {n-1}{x-1}}\mu^x(1-\mu)^{n-x}\\\\
+    &=n\mu\sum_{x=1}^{n}  {\binom {n-1}{x-1}} \mu^{x-1}(1-\mu)^{n-x}=n\mu
+\end{align*}</script><p>贝塔分布（Beta distribution）：对于参数$\alpha&gt;0,\beta&gt;0$，随机变量$x$的取值范围为$[0,1]$，其概率密度函数（PDF）为：</p>
+<script type="math/tex; mode=display">
+f(x;\alpha,\beta)=\frac{1}{\mathrm B(\alpha,\beta)}x^{\alpha-1}(1-x)^{\beta-1}</script><p>若$x\sim \mathrm{Beta} (\alpha,\beta)$，则随机变量$x$的期望为：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+    \mathrm E[x]&=\int_0^1 x\cdot \frac{x^{\alpha-1}(1-x)^{\beta-1}}{\mathrm B(\alpha,\beta)} \,\mathrm dx\\\\
+    &=\frac{1}{\mathrm B(\alpha,\beta)}\int_0^1x^\alpha(1-x)^{\beta-1}\,\mathrm dx\\\\
+    &=\frac{\mathrm B(\alpha+1,\beta)}{\mathrm B(\alpha,\beta)}\int_0^1\frac{x^\alpha(1-x)^{\beta-1}}{\mathrm B(\alpha+1,\beta)}\,\mathrm dx\\\\
+    &=\frac{\mathrm B(\alpha+1,\beta)}{\mathrm B(\alpha,\beta)}=\frac{\alpha}{\alpha+\beta}
+\end{align*}</script><p>如果我们要估计二项分布的参数$\mu$，从Bayesian的观点来看，我们引入关于$\mu$的先验分布$p(\mu)$，若把先验分布选择为Beta分布，即</p>
+<script type="math/tex; mode=display">
+p(\mu;\alpha,\beta)=\frac{1}{\mathrm B(\alpha,\beta)}\mu^{\alpha-1}(1-\mu)^{\beta-1}</script><p>在观察到数据$x$后的似然函数$p(x\mid \mu)$的形式为：</p>
+<script type="math/tex; mode=display">
+p(x\mid \mu;n)={\binom {n}{x}} \mu^x(1-\mu)^{n-x}</script><p>则后验概率$p(\mu\mid x)$为：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+    p(\mu\mid x;n,\alpha,\beta) &\propto p(x\mid \mu;n)p(\mu;\alpha,\beta)\\\\
+    &\propto \mu^x(1-\mu)^{n-x}\cdot \mu^{\alpha-1}(1-\mu)^{\beta-1}\\\\
+    &=\mu^{x+\alpha-1}(1-\mu)^{n-x+\beta-1}
+\end{align*}</script><p>此时我们看到后验分布形式与先验分布相同，即</p>
+<script type="math/tex; mode=display">
+p(\mu\mid x;n,\alpha,\beta) \sim \mathrm{Beta}(x+\alpha,n-x+\beta)</script><h3 id="Multinomial-distribution-and-Dirichlet-distribution（多项分布和狄利克雷分布）"><a href="#Multinomial-distribution-and-Dirichlet-distribution（多项分布和狄利克雷分布）" class="headerlink" title="Multinomial distribution and Dirichlet distribution（多项分布和狄利克雷分布）"></a>Multinomial distribution and Dirichlet distribution（多项分布和狄利克雷分布）</h3><p>标准n-单纯形定义为：</p>
+<script type="math/tex; mode=display">
+ \Delta^n:=\left\{(t_{0},\dots ,t_{n})\in \mathbb {R} ^{n+1}~{\Bigg |}~\sum _{i=0}^{n}t_{i}=1, \,t_{i}\geq 0, \quad i=0,\ldots ,n\right\}</script><p>分类分布（Categorical distribution）：对于参数$\boldsymbol{\mu}=\{\mu_1,\dots,\mu_k\}\in \Delta^{k-1}$，随机变量$\boldsymbol{x}=\{x_1,\dots,x_k\}\in \mathbb{\{0,1\}}^k$，$\sum _{i=1}^{k}x_{i}=1$，其概率质量函数（PMF）为：</p>
+<script type="math/tex; mode=display">
+f(x_1,\dots,x_k;n,\mu_1,\dots,\mu_k)=\prod_{i=1}^k\mu_{i}^{x_{i}}</script><p>多项分布（Multinomial distribution）：对于参数$n\in \mathbb{N},\boldsymbol{\mu}=\{\mu_1,\dots,\mu_k\}\in \Delta^{k-1}$，随机变量$\boldsymbol{x}=\{x_1,\dots,x_k\}\in \mathbb{N}^k$，$\sum _{i=1}^{k}x_{i}=n$，其概率质量函数（PMF）为：</p>
+<script type="math/tex; mode=display">
+f(x_1,\dots,x_k;n,\mu_1,\dots,\mu_k)={n! \over x_{1}!\cdots x_{k}!}\prod_{i=1}^k\mu_{i}^{x_{i}}</script><p>若$\boldsymbol{x}\sim \mathrm{Multinomial}(n,\boldsymbol{\mu})$，则类似二项分布，可求得随机变量$\boldsymbol{x}$的期望为：</p>
+<script type="math/tex; mode=display">
+\mathrm E[\boldsymbol{x}]=\left(n\mu_1,n\mu_2,\cdots,n\mu_k\right)</script><p>狄利克雷分布（Dirichlet distribution）：对于参数$\boldsymbol{\alpha}=\{\alpha_1,\dots,\alpha_k\}&gt;\boldsymbol{0}$，随机变量$\boldsymbol{x}=\{x_1,\dots,x_k\}\in \Delta^{k-1}$，其概率密度函数（PDF）为：</p>
+<script type="math/tex; mode=display">
+f(x_1,\dots,x_k;\alpha_1,\dots,\alpha_k)=\frac{1}{\mathrm B(\boldsymbol{\alpha})}\prod_{i=1}^kx_i^{\alpha_i-1}</script><p>若$\boldsymbol{x}\sim \mathrm{Dir} (\boldsymbol{\alpha})$，则类似Beta分布，可求得随机变量$\boldsymbol{x}$的期望为：</p>
+<script type="math/tex; mode=display">
+\mathrm E[\boldsymbol{x}]=\left(\frac{\alpha_1}{\alpha_0},\frac{\alpha_2}{\alpha_0},\cdots,\frac{\alpha_k}{\alpha_0}\right),\quad   \alpha_0=\sum_{i=1}^k\alpha_i</script><p>如果我们要估计多项分布的参数$\boldsymbol{\mu}$，同样从Bayesian的观点来看，我们引入关于$\boldsymbol{\mu}$的先验分布$p(\boldsymbol{\mu})$，若把先验分布选择为Dirichlet分布，即</p>
+<script type="math/tex; mode=display">
+p(\boldsymbol{\mu};\boldsymbol{\alpha})=\frac{1}{\mathrm B(\boldsymbol{\alpha})}\prod_{i=1}^k\mu_i^{\alpha_i-1}</script><p>在观察到数据$\boldsymbol{x}$后的似然函数$p(\boldsymbol{x}\mid \boldsymbol{\mu})$的形式为：</p>
+<script type="math/tex; mode=display">
+p(\boldsymbol{x}\mid \boldsymbol{\mu};n)={n! \over x_{1}!\cdots x_{k}!}\prod_{i=1}^k\mu_{i}^{x_{i}}</script><p>则后验概率$p(\boldsymbol\mu\mid \boldsymbol x)$为：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+    p(\boldsymbol \mu\mid \boldsymbol x;n,\boldsymbol\alpha) &\propto p(\boldsymbol x\mid \boldsymbol\mu;n)p(\boldsymbol\mu;\boldsymbol\alpha)\\\\
+    &\propto \prod_{i=1}^k\mu_{i}^{x_{i}}\cdot \prod_{i=1}^k\mu_i^{\alpha_i-1}\\\\
+    &=\prod_{i=1}^k\mu_i^{x_i+\alpha_i-1}
+\end{align*}</script><p>此时我们看到后验分布形式与先验分布相同，即</p>
+<script type="math/tex; mode=display">
+\begin{gather*}
+    p(\boldsymbol\mu\mid \boldsymbol x;n,\boldsymbol\alpha) \sim \mathrm{Dir}(\boldsymbol{\alpha}^\prime),\\\\
+    \boldsymbol \alpha^\prime=\left(x_1+\alpha_1-1,\cdots,x_k+\alpha_k-1\right)
+\end{gather*}</script><p><strong>Reference</strong></p>
 <p><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Conjugate_prior">Conjugate prior - Wikipedia</a></p>
+<p><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Dirichlet_distribution">Dirichlet distribution - Wikipedia</a></p>
 <p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/103854460">“共轭分布”是什么？ - 知乎 (zhihu.com)</a></p>
 
     </div>
@@ -348,7 +406,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Bayesian-theorem%EF%BC%88%E8%B4%9D%E5%8F%B6%E6%96%AF%E5%AE%9A%E7%90%86%EF%BC%89"><span class="nav-number">1.</span> <span class="nav-text">Bayesian theorem（贝叶斯定理）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Conjugate-distributions%EF%BC%88%E5%85%B1%E8%BD%AD%E5%88%86%E5%B8%83%EF%BC%89"><span class="nav-number">2.</span> <span class="nav-text">Conjugate distributions（共轭分布）</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Bayesian-theorem%EF%BC%88%E8%B4%9D%E5%8F%B6%E6%96%AF%E5%AE%9A%E7%90%86%EF%BC%89"><span class="nav-number">1.</span> <span class="nav-text">Bayesian theorem（贝叶斯定理）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Conjugate-distributions%EF%BC%88%E5%85%B1%E8%BD%AD%E5%88%86%E5%B8%83%EF%BC%89"><span class="nav-number">2.</span> <span class="nav-text">Conjugate distributions（共轭分布）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Binomial-distribution-and-Beta-distribution%EF%BC%88%E4%BA%8C%E9%A1%B9%E5%88%86%E5%B8%83%E5%92%8C%E8%B4%9D%E5%A1%94%E5%88%86%E5%B8%83%EF%BC%89"><span class="nav-number">2.1.</span> <span class="nav-text">Binomial distribution and Beta distribution（二项分布和贝塔分布）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Multinomial-distribution-and-Dirichlet-distribution%EF%BC%88%E5%A4%9A%E9%A1%B9%E5%88%86%E5%B8%83%E5%92%8C%E7%8B%84%E5%88%A9%E5%85%8B%E9%9B%B7%E5%88%86%E5%B8%83%EF%BC%89"><span class="nav-number">2.2.</span> <span class="nav-text">Multinomial distribution and Dirichlet distribution（多项分布和狄利克雷分布）</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
