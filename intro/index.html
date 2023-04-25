@@ -185,6 +185,72 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://trl-0.github.io/blog/oi/dp/number/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="TRL-0">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一个正在建设中的网页">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/blog/oi/dp/number/" class="post-title-link" itemprop="url">数位dp</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2023-04-25 16:36:04 / 修改时间：16:53:30" itemprop="dateCreated datePublished" datetime="2023-04-25T16:36:04+08:00">2023-04-25</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="数字计数">数字计数</h2>
+<h3 id="题目描述">题目描述</h3>
+<p>给定两个正整数 $a$ 和 $b$，求在 $[a,b]$ 中的所有整数中，每个数码(digit)各出现了多少次。<br>
+（<a target="_blank" rel="noopener" href="https://www.luogu.com.cn/problem/P2602">原题链接</a>）</p>
+<h3 id="代码">代码</h3>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;bits/stdc++.h&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"><span class="keyword">typedef</span> <span class="type">long</span> <span class="type">long</span> ll;</span><br><span class="line"><span class="type">int</span> digit, cnt;      <span class="comment">// digit: 要查找的数字; cnt: 最大值位数</span></span><br><span class="line">ll dp[<span class="number">20</span>][<span class="number">20</span>][<span class="number">2</span>][<span class="number">2</span>]; <span class="comment">// dp[pos][cntd][limit][lead]</span></span><br><span class="line"><span class="comment">// pos: 当前位数; cntd: 已找到digit次数; limit: 当前位是否受最大值限制; lead: 是否为前导0</span></span><br><span class="line"><span class="type">int</span> X[<span class="number">20</span>]; <span class="comment">// X: 最大值</span></span><br><span class="line"></span><br><span class="line"><span class="function">ll <span class="title">dfs</span><span class="params">(<span class="type">int</span> pos, <span class="type">int</span> cntd, <span class="type">bool</span> limit, <span class="type">bool</span> lead)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (pos == <span class="number">-1</span>)</span><br><span class="line">        <span class="keyword">return</span> cntd; <span class="comment">// 递归边界</span></span><br><span class="line">    <span class="keyword">if</span> (~dp[pos][cntd][limit][lead])</span><br><span class="line">        <span class="keyword">return</span> dp[pos][cntd][limit][lead];</span><br><span class="line">    ll ans = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> d = <span class="number">0</span>; d &lt;= (limit ? X[pos] : <span class="number">9</span>); d++)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span> (!d &amp;&amp; lead) <span class="comment">// 前导0</span></span><br><span class="line">            ans += <span class="built_in">dfs</span>(pos - <span class="number">1</span>, cntd, limit &amp;&amp; (d == X[pos]), <span class="number">1</span>);</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            ans += <span class="built_in">dfs</span>(pos - <span class="number">1</span>, cntd + (d == digit), limit &amp;&amp; (d == X[pos]), <span class="number">0</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    dp[pos][cntd][limit][lead] = ans; <span class="comment">// 记忆化搜索</span></span><br><span class="line">    <span class="keyword">return</span> ans;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">ll <span class="title">f</span><span class="params">(ll x)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    cnt = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">while</span> (x) <span class="comment">// 将x转换为数组X</span></span><br><span class="line">        X[cnt++] = x % <span class="number">10</span>, x /= <span class="number">10</span>;</span><br><span class="line">    <span class="built_in">memset</span>(dp, <span class="number">-1</span>, <span class="built_in">sizeof</span>(dp));</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">dfs</span>(cnt - <span class="number">1</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">1</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    ll a, b;</span><br><span class="line">    cin &gt;&gt; a &gt;&gt; b;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="number">10</span>; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        digit = i;</span><br><span class="line">        cout &lt;&lt; <span class="built_in">f</span>(b) - <span class="built_in">f</span>(a - <span class="number">1</span>) &lt;&lt; <span class="string">&#x27; &#x27;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://trl-0.github.io/blog/Sampling-Method/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -586,7 +652,7 @@ p(\boldsymbol{x}\mid \boldsymbol{\mu};n)={n! \over x_{1}!\cdots x_{k}!}\prod_{i=
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-04-04 00:01:06" itemprop="dateModified" datetime="2023-04-04T00:01:06+08:00">2023-04-04</time>
+                <time title="修改时间：2023-04-06 15:48:17" itemprop="dateModified" datetime="2023-04-06T15:48:17+08:00">2023-04-06</time>
               </span>
 
           
@@ -600,8 +666,22 @@ p(\boldsymbol{x}\mid \boldsymbol{\mu};n)={n! \over x_{1}!\cdots x_{k}!}\prod_{i=
     <div class="post-body" itemprop="articleBody">
 
       
-          <p>前置知识：</p>
-<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2>
+          <h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>潜在狄利克雷分布（Latent Dirichlet Allocation，LDA）是基于贝叶斯学习的主题模型，是LSA,PLSA的扩展。它可以将文档集中每篇文档的主题以概率分布的形式给出，从而通过分析一些文档抽取出它们的主题分布后，便可以根据主题分布进行主题聚类或文本分类。</p>
+<h2 id="Latent-Dirichlet-Allocation"><a href="#Latent-Dirichlet-Allocation" class="headerlink" title="Latent Dirichlet Allocation"></a>Latent Dirichlet Allocation</h2><p><b><span style="color:red;">前置知识：</span></b><a href="/blog/Conjugate-distributions/">共轭分布</a>，<a href="/blog/Probabilistic-Latent-Semantic-Analysis/">概率潜在语义分析（PLSA）</a>，<a href="/blog/Sampling-Method/">MCMC和Gibbs采样</a></p>
+<p>LDA将贝叶斯估计引入主题模型，认为参数本身也可以从先验中采样，在PLSA的基础上，为主题分布和词分布的参数分别加了Dirichlet先验：<br><img src="/blog/Latent-Dirichlet-Allocation/1.png" alt="LDA概率图模型" title="LDA概率图模型"></p>
+<p>其中$z$表示目标文档分配在每个词上的隐含主题份额；$w$是目标文档的词向量表示形式；$\theta$是参数$p(z\mid d)$，表示文档-主题分布；$\varphi$是参数$p(w\mid z)$，表示主题-词汇分布；$\alpha$是$\theta$的先验，$\beta$是$\varphi$的先验，通常设置成相同数值。</p>
+<p>可以认为LDA就是PLSA的贝叶斯化版本。因此在LDA中，生成文档的过程如下：</p>
+<ul>
+<li>按照先验概率$p(d_i)$选择一篇文档$d_i$；</li>
+<li>从Dirichlet分布$\alpha$中取样生成文档$d_i$的主题分布$\theta_i$；</li>
+<li>从主题的多项式分布$\theta_i$中取样生成文档$d_i$第$j$个词的主题$z_{i,j}$；</li>
+<li>从Dirichlet分布$\beta$中取样生成主题$z_{i,j}$对应的词语分布$\varphi_{z_{i,j} }$；</li>
+<li>从词语的多项式分布$\varphi_{z_{i,j} }$中采样最终生成词语$w_{i,j}$。</li>
+</ul>
+<p><strong>Reference</strong></p>
+<p>上课的PPT</p>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/31470216">一文详解LDA主题模型 - 知乎 (zhihu.com)</a></p>
+
       
     </div>
 
@@ -784,7 +864,7 @@ p(x_1,x_2,\dots, x_n)=\prod_{i\in V}p(x_i\mid \boldsymbol{x}_{Pa(i)})</script><p
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-04-04 00:02:33" itemprop="dateModified" datetime="2023-04-04T00:02:33+08:00">2023-04-04</time>
+                <time title="修改时间：2023-04-06 15:08:52" itemprop="dateModified" datetime="2023-04-06T15:08:52+08:00">2023-04-06</time>
               </span>
 
           
@@ -806,9 +886,15 @@ p(x_1,x_2,\dots, x_n)=\prod_{i\in V}p(x_i\mid \boldsymbol{x}_{Pa(i)})</script><p
 <script type="math/tex; mode=display">
 C=U\Sigma V^T,\quad C\approx \hat{U}\hat{\Sigma} \hat{V}^T (\text{truncated})</script><p>其中$\hat{U}\in \mathbb{R}^{N \times K}$是词项特征向量组成的矩阵，表示词项在隐含语义空间（主题空间）中的变换，$CC^T$表示词项相似度，值为两个词项在文档中共现次数；$\hat{V}\in \mathbb{R}^{M \times K}$是文档特征向量组成的矩阵，表示文档在隐含语义空间（主题空间）中的变换，$C^TC$表示文档相似度，值为两个文档中共同词项的数量。通过奇异值分解我们即完成了对词和文档的分类，同时得到了不同主题的文章其相关的高频词。</p>
 <p>LSA的优势是可以一定程度建模一义多词现象，同时可以得到词项相似度、文档相似度、词项与文档的相似度，可用于信息检索。但其仍有缺陷，潜在语义空间中的元素缺少解释；$K$是经验性的设定；SVD求解复杂度较高，存在数值不稳定问题，当有新的文档来到时，若要更新模型需重新训练。</p>
-<h2 id="PLSA（概率潜在语义分析）"><a href="#PLSA（概率潜在语义分析）" class="headerlink" title="PLSA（概率潜在语义分析）"></a>PLSA（概率潜在语义分析）</h2><p><b><span style="color:red;">前置知识：</span></b><a href="/blog/EM-algorithm/">EM算法</a>，<a href="/blog/Probabilistic-Graphical-Models/">概率图模型</a></p>
+<h2 id="PLSA（概率潜在语义分析）"><a href="#PLSA（概率潜在语义分析）" class="headerlink" title="PLSA（概率潜在语义分析）"></a>PLSA（概率潜在语义分析）</h2><p><b><span style="color:red;">前置知识：</span></b><a href="/blog/EM-Algorithm/">EM算法</a>，<a href="/blog/Probabilistic-Graphical-Models/">概率图模型</a></p>
 <p>PLSA加入了主题这一隐变量，记主题集合为$Z = \{z_1,\dots, z_K\}$。主题模型主要关心文档生成主题，主题生成词汇。PLSA利用概率方法学习隐含的主题分布，是一种基于有向图的生成模型：<br><img src="/blog/Probabilistic-Latent-Semantic-Analysis/1.png" alt="PLSA概率图模型" title="PLSA概率图模型"></p>
 <p>上述变量有两个状态：observed ($d,w$), latent ($z$)。由概率图的定义，联合概率$p(d_i,w_j,z_k)=p(d_i)p(z_k\mid d_i)p(w_j\mid z_k)$。其中$p(d_i)$表示生成文档$d_i$的概率；$p(z_k\mid d_i)$表示文档$d_i$生成主题$z_k$的概率（每个文档$d_i$的主题概率分布）；$p(w_j\mid z_k)$表示主题$z_k$生成词项$w_j$的概率（每个主题$z_k$的词项概率分布）。</p>
+<p>因此我们可以得到PLSA中文档生成的方式：</p>
+<ul>
+<li>按照概率$p(d_i)$选择一篇文档$d_i$；</li>
+<li>根据选择的文档$d_i$，从主题分布中按照概率$p(z_k\mid d_i)$选择隐含的主题类别$z_k$；</li>
+<li>根据选择的主题$z_k$, 从词分布中按照概率$p(w_j\mid z_k)$选择词$w_j$。</li>
+</ul>
 <p>我们需要对观测到的变量$d, w$做最大似然估计，得到对数似然函数：</p>
 <script type="math/tex; mode=display">
 \begin{align*}
@@ -855,6 +941,8 @@ Q=\sum_{i=1}^M\sum_{j=1}^Nn(d_i,w_j)\sum_{k=1}^K \hat{p}(z_k\mid d_i,w_j)\log \l
 <li>设置参数$p(z_k\mid d_i), p(w_j\mid z_k)$的初始值；</li>
 <li>迭代执行E-step, M-step直至收敛或达到最大迭代轮次，得到参数$p(z_k\mid d_i), p(w_j\mid z_k)$的终值。</li>
 </ul>
+<p>此时我们已经知道PLSA里的参数，我们用$\theta$代替参数$p(z\mid d)$，表示文档-主题分布，$\varphi$代替参数$p(w\mid z)$，表示主题-词汇分布，我们可以得到PLSA的另一种形式的概率图模型：</p>
+<p><img src="/blog/Probabilistic-Latent-Semantic-Analysis/2.png" alt="PLSA另一种形式的概率图模型" title="PLSA另一种形式的概率图模型"></p>
 <p>PLSA是LSA的概率化版本，主题以词的概率分布表示，文档则以主题的概率分布表示，相比LSA，概率化的理论解释性更好。但主题数量仍然需要经验性确定；需要学习的参数量多，有过拟合的可能性，需要大量的样本才能得到较好的模型；没有解决为未知文档分配主题概率的问题。</p>
 <p><strong>Reference</strong></p>
 <p>上课的PPT</p>
@@ -1042,7 +1130,7 @@ q(z)=\frac{p(X,z;\theta)}{c}=\frac{p(X,z;\theta)}{p(\boldsymbol{X};\theta)}=p(z\
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">8</span>
+          <span class="site-state-item-count">9</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
